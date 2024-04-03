@@ -1,9 +1,7 @@
 import random
 
-
 def adjacentes(u, solucao, arestas):
-  return [v for v in arestas[u] if arestas[u][v] == 1]
-
+  return [v for v in solucao if arestas[u][v] == 1]
 
 def isEmpty(arestas):
   for i in range(len(arestas)):
@@ -11,7 +9,6 @@ def isEmpty(arestas):
       if arestas[i][j] == 1:
         return False
   return True
-
 
 def swap(solucao):
   porcentagem = 0.1
@@ -26,7 +23,6 @@ def swap(solucao):
       contador += 1
   return solucao
 
-
 if __name__ == "__main__":
   arestas = [[0, 1, 0, 1, 0, 1], [1, 0, 1, 1, 1, 1], [0, 1, 0, 0, 0, 0],
              [1, 1, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0]]
@@ -37,11 +33,10 @@ if __name__ == "__main__":
       break
     else:
       adj = adjacentes(u, solucao, arestas)
-      if len(adj) >= 0:
-        for v in adj:
-          arestas[u][v] = 0
-          arestas[v][u] = 0
-        conjunto.append(u)
+      for v in adj:
+        arestas[u][v] = 0
+        arestas[v][u] = 0
+      conjunto.append(u)
   print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}")
 
   # solucao = swap(solucao)
