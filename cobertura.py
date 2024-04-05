@@ -31,7 +31,12 @@ def descobreGrau(u, vertices, matrizArestas):
   return len(adjacentes(u, vertices, matrizArestas))
 
 if __name__ == '__main__':
-  arquivo = './datasets/bio-diseasome/bio-diseasome.mtx'
+  bio_diseasome = './datasets/bio-diseasome/bio-diseasome.mtx'
+  arquivo = './datasets/email-Enron/Email-Enron.txt'
+  inf_power = './datasets/inf-power/infectious/inf-power.mtx'
+  road_netherlands = './datasets/road-netherlands-osm/road-netherlands-osm.mtx'
+  wiki_vote = './datasets/wiki-Vote/Wiki-Vote.txt'
+  p2p_gnutella31 = './datasets/p2p-Gnutella31.txt'
 
   with open(arquivo, 'r') as f:
     firstLine = f.readline()
@@ -58,19 +63,15 @@ if __name__ == '__main__':
     graus[indice] = -1
   
   conjunto = []
-  for k in range(0, 5):
-    copia = matrizArestas.copy()
-    for s in solucao:
-      if isEmpty(copia):
-        break
-      else:
-        adj = adjacentes(s, solucao, copia)
-        if len(adj) > 0:
-          for v in adj:
-            copia[s][v] = 0
-            copia[v][s] = 0
-          conjunto.append(s)
+  for s in solucao:
+    if isEmpty(matrizArestas):
+      break
+    else:
+      adj = adjacentes(s, solucao, matrizArestas)
+      if len(adj) > 0:
+        for v in adj:
+          matrizArestas[s][v] = 0
+          matrizArestas[v][s] = 0
+        conjunto.append(s)
 
-    print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
-    solucao = swap(solucao)
-    conjunto.clear()
+  print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
