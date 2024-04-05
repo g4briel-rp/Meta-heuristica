@@ -1,12 +1,12 @@
 import random
+import numpy as np
 
 def imprime(list):
-    for i in list:
-        print(i)
+  for i in list:
+    print(i)
 
 def adjacentes(u, vertices, matrizArestas):
-   print(vertices)
-#   return [v for v in vertices if matrizArestas[u-1][v-1] == 1]
+  return [v for v in vertices if matrizArestas[u][v] == 1]
 
 def isEmpty(arestas):
   for i in range(len(arestas)):
@@ -18,7 +18,6 @@ def isEmpty(arestas):
 def swap(solucao):
   porcentagem = 0.1
   qtd = round(porcentagem * len(solucao))
-  print(qtd)
   contador = 0
   while contador < qtd:
     index1 = random.randint(0, len(solucao) - 1)
@@ -29,28 +28,49 @@ def swap(solucao):
   return solucao
 
 def descobreGrau(u, vertices, matrizArestas):
-   return len(adjacentes(u, vertices, matrizArestas))
+  return len(adjacentes(u, vertices, matrizArestas))
 
 if __name__ == '__main__':
-    arquivo = './datasets/bio-diseasome/bio-diseasome.mtx'
-    matrizArestas = []
+  arquivo = './datasets/bio-diseasome/bio-diseasome.mtx'
 
-    with open(arquivo, 'r') as f:
-        firstLine = f.readline()
-        dados = firstLine.split()
-        vertices = int(dados[0])
-        arestas = int(dados[1])
+  with open(arquivo, 'r') as f:
+    firstLine = f.readline()
+    dados = firstLine.split()
+    vertices = int(dados[0])
+    listaVertices = list(range(0, vertices + 1))
+    arestas = int(dados[1])
 
-        linhas = f.readlines()
-        for line in linhas:
-            line = line.split()
-            matrizArestas.append([int(line[0]), int(line[1]), 1])
-            matrizArestas.append([int(line[1]), int(line[0]), 1])
-    
-    # graus = []
-    # for i in range(1, vertices):
-    #     graus.append(descobreGrau(i, list(range(1, vertices + 1)), matrizArestas))
-    
-    print(matrizArestas[0:11])
+    matrizArestas = np.zeros((vertices + 1, vertices + 1))
+    linhas = f.readlines()
+    for line in linhas:
+      line = line.split()
+      matrizArestas[int(line[0])][int(line[1])] = 1
+      matrizArestas[int(line[1])][int(line[0])] = 1
+  
+  graus = []
+  for i in listaVertices:
+    graus.append(descobreGrau(i, listaVertices, matrizArestas))
+  
+  solucao = []
+  while not all(i == -1 for i in graus):
+    indice = graus.index(max(graus))
+    solucao.append(indice)
+    graus[indice] = -1
+  
+  conjunto = []
+  for k in range(0, 5):
+    copia = matrizArestas.copy()
+    for s in solucao:
+      if isEmpty(copia):
+        break
+      else:
+        adj = adjacentes(s, solucao, copia)
+        if len(adj) > 0:
+          for v in adj:
+            copia[s][v] = 0
+            copia[v][s] = 0
+          conjunto.append(s)
 
-    # corrigir a criação da matriz de arestas
+    print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
+    solucao = swap(solucao)
+    conjunto.clear()
