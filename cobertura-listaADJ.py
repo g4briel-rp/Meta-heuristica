@@ -1,5 +1,5 @@
 import random
-from collections import defaultdict
+from collections import defaultdict, deque
 
 def adjacentes(u, listaADJ):
     adj = []
@@ -7,8 +7,7 @@ def adjacentes(u, listaADJ):
         adj.append(v)
     return adj
 
-def swap(solucao):
-    porcentagem = 0.1
+def swap(solucao, porcentagem = 0.1):
     qtd = round(porcentagem * len(solucao))
     contador = 0
     while contador < qtd:
@@ -18,6 +17,11 @@ def swap(solucao):
             solucao[index1], solucao[index2] = solucao[index2], solucao[index1]
             contador += 1
     return solucao
+
+def shift(solucao, n):
+    solucao = deque(solucao)
+    solucao.rotate(n)
+    return list(solucao)
 
 def descobreGrau(u, listaADJ):
     return len(adjacentes(u, listaADJ))
