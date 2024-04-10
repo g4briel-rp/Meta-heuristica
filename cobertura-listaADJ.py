@@ -1,11 +1,9 @@
 import random
+import time
 from collections import defaultdict, deque
 
 def adjacentes(u, listaADJ):
-    adj = []
-    for v in listaADJ[u]:
-        adj.append(v)
-    return adj
+    return listaADJ[u]
 
 def swap(solucao, porcentagem = 0.1):
     qtd = round(porcentagem * len(solucao))
@@ -29,61 +27,111 @@ def descobreGrau(u, listaADJ):
 def addADJ(listaADJ, u, v):
     listaADJ[u].add(v)
 
-def solucao_one_max(solucao, graus):
-    while not all(i == -1 for i in graus):
+def solucao_one_max(numVertices, solucao, graus, listaADJ):
+    analisados = 0
+    while analisados <= numVertices:
         indice = graus.index(max(graus))
         solucao.append(indice)
         graus[indice] = -1
+        analisados += 1
 
-def solucao_one_min(solucao, graus, limite):
-    while not all(i == limite for i in graus): 
-        indice = graus.index(min(graus)) 
-        solucao.append(indice) 
-        graus[indice] = limite
-
-def solucao_n_max(solucao, graus, listaADJ):
     conjunto = []
-    while not all(i == -1 for i in graus):
-        indice = graus.index(max(graus))
-        solucao.append(indice)
-        graus[indice] = -1
-
+    for s in solucao:
         if not listaADJ:
             break
         else:
-            adj = adjacentes(indice, listaADJ)
-            if len(adj) > 0:
+            adj = adjacentes(s, listaADJ)
+            if adj:
+                adj = list(adj)
                 for v in adj:
-                    listaADJ[indice].remove(v)
-                    listaADJ[v].remove(indice)
-                conjunto.append(indice)
-        
-        for g in range(0, len(graus)):
-            if graus[g] != -1:
-                graus[g] = descobreGrau(g, listaADJ)
+                    listaADJ[s].remove(v)
+                    listaADJ[v].remove(s)
+                conjunto.append(s)
 
     print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
 
-def solucao_n_min(solucao, graus, listaADJ, limite):
-    conjunto = []
-    while not all(i == limite for i in graus):
-        indice = graus.index(min(graus))
-        solucao.append(indice)
+def solucao_one_min(numVertices, solucao, graus, listaADJ):
+    limite = numVertices
+    analisados = 0
+    while analisados <= numVertices: 
+        indice = graus.index(min(graus)) 
+        solucao.append(indice) 
         graus[indice] = limite
+        analisados += 1
+    
+    conjunto = []
+    for s in solucao:
+        if not listaADJ:
+            break
+        else:
+            adj = adjacentes(s, listaADJ)
+            if adj:
+                adj = list(adj)
+                for v in adj:
+                    listaADJ[s].remove(v)
+                    listaADJ[v].remove(s)
+                conjunto.append(s)
+
+    print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
+
+def solucao_n_max(numVertices, solucao, graus, listaADJ):
+    conjunto = []
+    lenGraus = range(0, len(graus))
+    analisados = 0
+    while analisados <= numVertices:
+        indice = graus.index(max(graus))
+        solucao.append(indice)
+        graus[indice] = -1
+        analisados += 1
 
         if not listaADJ:
             break
         else:
             adj = adjacentes(indice, listaADJ)
-            if len(adj) > 0:
+            if adj:
+                adj = list(adj)
                 for v in adj:
                     listaADJ[indice].remove(v)
                     listaADJ[v].remove(indice)
                 conjunto.append(indice)
         
-        for g in range(0, len(graus)):
+        for g in lenGraus:
+            if graus[g] != -1:
+                graus[g] = descobreGrau(g, listaADJ)
+                if graus[g] == 0:
+                    graus[g] = -1
+                    analisados += 1
+
+    print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
+
+def solucao_n_min(numVertices, solucao, graus, listaADJ):
+    conjunto = []
+    lenGraus = range(0, len(graus))
+    limite = numVertices
+    analisados = 0
+    while analisados <= numVertices:
+        indice = graus.index(min(graus))
+        solucao.append(indice)
+        graus[indice] = limite
+        analisados += 1
+
+        if not listaADJ:
+            break
+        else:
+            adj = adjacentes(indice, listaADJ)
+            if adj:
+                adj = list(adj)
+                for v in adj:
+                    listaADJ[indice].remove(v)
+                    listaADJ[v].remove(indice)
+                conjunto.append(indice)
+        
+        for g in lenGraus:
             if graus[g] != limite:
                 graus[g] = descobreGrau(g, listaADJ)
+                if graus[g] == 0:
+                    graus[g] = limite
+                    analisados += 1
 
     print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
 
@@ -95,7 +143,7 @@ if __name__ == '__main__':
     arquivo5 = './datasets/wiki-Vote/Wiki-Vote.txt'
     arquivo6 = './datasets/p2p-Gnutella31.txt'
 
-    with open(arquivo1, 'r') as f:
+    with open(arquivo4, 'r') as f:
         firstLine = f.readline()
         dados = firstLine.split()
         vertices = int(dados[0])
@@ -114,22 +162,23 @@ if __name__ == '__main__':
         graus.append(descobreGrau(v, listaADJ))
     
     solucao = []
-    # solucao_one_max(solucao, graus)
-    # solucao_one_min(solucao, graus, vertices)
 
-    # conjunto = []
-    # for s in solucao:
-    #     if not listaADJ:
-    #         break
-    #     else:
-    #         adj = adjacentes(s, listaADJ)
-    #         if len(adj) > 0:
-    #             for v in adj:
-    #                 listaADJ[s].remove(v)
-    #                 listaADJ[v].remove(s)
-    #             conjunto.append(s)
+    # inicio = time.time()
+    # solucao_one_max(vertices, solucao, graus, listaADJ)
+    # fim = time.time()
+    # print(f"Tempo de execução: {fim - inicio}")
 
-    # print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
+    inicio = time.time()
+    solucao_one_min(vertices, solucao, graus, listaADJ)
+    fim = time.time()
+    print(f"Tempo de execução: {fim - inicio}")
 
-    # solucao_n_max(solucao, graus, listaADJ)
-    solucao_n_min(solucao, graus, listaADJ, vertices)
+    # inicio = time.time()
+    # solucao_n_max(vertices, solucao, graus, listaADJ)
+    # fim = time.time()
+    # print(f"Tempo de execução: {fim - inicio}")
+    
+    # inicio = time.time()
+    # solucao_n_min(vertices, solucao, graus, listaADJ)
+    # fim = time.time()
+    # print(f"Tempo de execução: {fim - inicio}")
