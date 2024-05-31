@@ -139,7 +139,7 @@ if __name__ == '__main__':
     arquivo1 = './datasets/bio-diseasome/bio-diseasome.mtx'
     arquivo2 = './datasets/email-Enron/Email-Enron.txt'
     arquivo3 = './datasets/inf-power/inf-power.mtx'
-    arquivo4 = './datasets/road-netherlands-osm/road-netherlands-osm.mtx'
+    arquivo4 = './datasets/road-usroads/road-usroads.mtx'
     arquivo5 = './datasets/wiki-Vote/Wiki-Vote.txt'
     arquivo6 = './datasets/p2p-Gnutella31.txt'
 
@@ -166,19 +166,19 @@ if __name__ == '__main__':
     # inicio = time.time()
     # solucao_one_max(vertices, solucao, graus, listaADJ)
     # fim = time.time()
-    # print(f"Tempo de execução: {fim - inicio}")
+    # print(f"Tempo de execução: {round(fim - inicio, 5)}")
 
     inicio = time.time()
     solucao_one_min(vertices, solucao, graus, listaADJ)
     fim = time.time()
-    print(f"Tempo de execução: {fim - inicio}")
+    print(f"Tempo de execução: {round(fim - inicio, 5)}")
 
     # inicio = time.time()
     # solucao_n_max(vertices, solucao, graus, listaADJ)
     # fim = time.time()
-    # print(f"Tempo de execução: {fim - inicio}")
+    # print(f"Tempo de execução: {round(fim - inicio, 5)}")
     
     # inicio = time.time()
     # solucao_n_min(vertices, solucao, graus, listaADJ)
     # fim = time.time()
-    # print(f"Tempo de execução: {fim - inicio}")
+    # print(f"Tempo de execução: {round(fim - inicio, 5)}")
