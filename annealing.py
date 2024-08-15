@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     inicio = time.time()
 
-    with open(arquivo3, 'r') as f:
+    with open(arquivo1, 'r') as f:
         firstLine = f.readline()
         dados = firstLine.split()
         vertices = int(dados[0])
@@ -205,12 +205,12 @@ if __name__ == '__main__':
     # solucao = []
     # solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
     
-    # solucao = []
-    # solucao_n_min(vertices, solucao, graus.copy(), deepcopy(listaADJ))
-
     solucao = []
-    solucao = listaVertices
-    solucao = random.sample(solucao, len(solucao))
+    solucao_n_min(vertices, solucao, graus.copy(), deepcopy(listaADJ))
+
+    # solucao = []
+    # solucao = listaVertices
+    # solucao = random.sample(solucao, len(solucao))
 
     melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
 
