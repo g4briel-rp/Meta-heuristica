@@ -1,3 +1,6 @@
+import cProfile, pstats, io
+from pstats import SortKey
+
 import random
 import time
 import numpy as np
@@ -51,7 +54,7 @@ def avalia_solucao(solucao, listaADJ):
 
     return conjunto, len(conjunto)
 
-def solucao_one_max(numVertices, solucao, graus, listaADJ):
+def solucao_one_max(numVertices, solucao, graus):
     analisados = 0
     while analisados <= numVertices:
         indice = graus.index(max(graus))
@@ -59,7 +62,7 @@ def solucao_one_max(numVertices, solucao, graus, listaADJ):
         graus[indice] = -1
         analisados += 1
 
-def solucao_one_min(numVertices, solucao, graus, listaADJ):
+def solucao_one_min(numVertices, solucao, graus):
     limite = numVertices
     analisados = 0
     while analisados <= numVertices: 
@@ -217,6 +220,7 @@ def colonia_formigas(tempo_max, k, numero_solucoes, numero_melhores_solucoes, fe
         # avaliar os melhores conjuntos
         # atualizar a lista de feromonios
         # retorna o melhor conjunto e seu tamanho
+    melhor = None
     while k > 0:
         individuos = []
         i = numero_solucoes
@@ -254,17 +258,24 @@ def colonia_formigas(tempo_max, k, numero_solucoes, numero_melhores_solucoes, fe
 
         # print(f"Feromonios: {feromonios}")
 
-        melhor = melhores[0]
-        print(f"Tamanho: do melhor conjunto da geração {k}: {len(melhor)}")
+        print(f"Tamanho: do melhor conjunto da geração {k}: {len(melhores[0])}")
 
-        # retornar o melhor dos melhores
+        if not melhor:
+            melhor = melhores[0]
+        else:
+            if len(melhores[0]) < len(melhor):
+                melhor = melhores[0]
+
     
-        input("Pressione Enter para continuar...")
+        # input("Pressione Enter para continuar...")
         k -= 1
 
-    return True, True
+    return melhor, len(melhor)
 
 if __name__ == '__main__':
+    pr = cProfile.Profile()
+    pr.enable()
+    
     arquivo_teste = './datasets/teste.txt'
     arquivo1 = './datasets/bio-diseasome/bio-diseasome.mtx'
     arquivo2 = './datasets/email-Enron/Email-Enron.txt'
@@ -299,8 +310,8 @@ if __name__ == '__main__':
     # solucao = []
     # solucao_one_min(vertices, solucao, graus.copy(), deepcopy(listaADJ))
 
-    # solucao = []
-    # solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
+    solucao = []
+    solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
     
     # solucao = []
     # solucao_n_min(vertices, solucao, graus.copy(), deepcopy(listaADJ))
@@ -309,11 +320,9 @@ if __name__ == '__main__':
     # solucao = listaVertices
     # solucao = random.sample(solucao, len(solucao))
 
-    # melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
+    melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
 
-    # print(f"Tamanho melhor conjunto: {tamanho_melhor_conjunto}\n")
-
-    inicio = time.time()
+    print(f"Tamanho melhor conjunto: {tamanho_melhor_conjunto}\n")
 
     # Simulated Annealing
 
@@ -325,23 +334,28 @@ if __name__ == '__main__':
     # solucao, conjunto, tam_conjunto = localSearch(solucao, temp, temp * 0.1, 0.9, 5, 20, shift, False, deepcopy(listaADJ))
 
     # annealing -> True
-    # solucao, conjunto, tam_conjunto = localSearch(solucao, temp, temp * 0.1, 0.9, 5, 20, swap, True, deepcopy(listaADJ))
+    solucao, conjunto, tam_conjunto = localSearch(solucao, temp, temp * 0.1, 0.9, 5, 20, swap, True, deepcopy(listaADJ))
     # solucao, conjunto, tam_conjunto = localSearch(solucao, temp, temp * 0.1, 0.9, 5, 20, shift, True, deepcopy(listaADJ))
 
     # Variable Neighborhood Search
     # conjunto, tam_conjunto = vns(solucao, 5, 10, deepcopy(listaADJ))
 
+    print(f"Tamanho do melhor conjunto inicial: {tamanho_melhor_conjunto}\nTamanho do melhor conjunto encontrado: {tam_conjunto}")
+
     # Colonias de Formigas
-    feromonios = defaultdict(set)
-    for i in listaVertices:
-        feromonios[i] = 1
+    # feromonios = defaultdict(set)
+    # for i in listaVertices:
+    #     feromonios[i] = 1
 
     # print(feromonios)
 
                                             # tempo_max, k, numero_solucoes, numero_melhores_solucoes, intervalo, feromonios, listaADJ
-    conjunto, tam_conjunto = colonia_formigas(0, 5, 100, 10, feromonios, deepcopy(listaADJ))
+    # conjunto, tam_conjunto = colonia_formigas(0, 5, 20, 5, feromonios, deepcopy(listaADJ))
+    # print(f"Melhor conjunto: {conjunto}\nTamanho do melhor conjunto: {tam_conjunto}")
 
-    fim = time.time()
-
-    print(f"Tempo de execução: {round(fim - inicio, 5)}")
-    # print(f"Tamanho do melhor conjunto inicial: {tamanho_melhor_conjunto}\nTamanho do melhor conjunto encontrado: {tam_conjunto}")
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
