@@ -177,8 +177,9 @@ if __name__ == '__main__':
     instancia1 = 'instancias-MH/umk.txt'
     instancia2 = 'instancias-MH/cemk.txt'
     instancia3 = 'instancias-MH/umM.txt'
+    instancia4 = 'instancias-MH/vqM.mtx'
 
-    instancias = [instancia1, instancia2, instancia3]
+    instancias = [instancia1, instancia2, instancia3, instancia4]
     
     for i in instancias:
         with open(i, 'r') as f:
