@@ -10,7 +10,12 @@ contador_instancias = 1
 def adjacentes(u, listaADJ):
     return listaADJ[u]
 
-def swap(solucao, porcentagem = 0.0005):
+# adaptar a porcentagem de acordo com a instancia
+# 0.005 para instancia 1
+# 0.00005 para instancia 2
+# 0.000005 para instancia 3
+# 0.0000005 para instancia 4
+def swap(solucao, porcentagem = 0.005):
     qtd = round(porcentagem * len(solucao))
     contador = 0
     while contador < qtd:
@@ -20,11 +25,6 @@ def swap(solucao, porcentagem = 0.0005):
             solucao[index1], solucao[index2] = solucao[index2], solucao[index1]
             contador += 1
     return solucao
-
-def shift(solucao, n):
-    solucao = deque(solucao)
-    solucao.rotate(n)
-    return list(solucao)
 
 def descobreGrau(u, listaADJ):
     return len(adjacentes(u, listaADJ))
@@ -101,12 +101,8 @@ def localSearch(solucao_inicial, temp_inicial, temp_final, alpha, reaquecimentos
             i = 0
             while i < qtd_vizinhos:
                 i += 1
-                if estrutura_vizinhanca == shift:
-                    nova_solucao = estrutura_vizinhanca(solucao_atual.copy(), int(len(solucao_atual) * 0.05))
-                elif estrutura_vizinhanca == swap:
-                    nova_solucao = estrutura_vizinhanca(solucao_atual.copy())
+                nova_solucao = estrutura_vizinhanca(solucao_atual.copy())
 
-                # chamar o avalia e analisar o retorno dele
                 _, tamanho_obj_solucao_atual = avalia_solucao(solucao_atual, deepcopy(listaADJ))
                 _, tamanho_obj_nova_solucao = avalia_solucao(nova_solucao, deepcopy(listaADJ))
 
@@ -115,19 +111,12 @@ def localSearch(solucao_inicial, temp_inicial, temp_final, alpha, reaquecimentos
                 if delta > 0:
                     solucao_atual = nova_solucao
 
-                    # chamar o avalia e analisar o retorno dele
                     melhor_conjunto, tamanho_obj_melhor_solucao = avalia_solucao(melhor_solucao, deepcopy(listaADJ))
 
                     delta2 = tamanho_obj_melhor_solucao - tamanho_obj_nova_solucao
 
                     if delta2 > 0:
                         melhor_solucao = solucao_atual
-                        
-                        with open('output-MH2-instancia-' + str(contador_instancias) + '.txt', 'w') as f:
-                            f.write(f"Solucao busca local: {melhor_solucao}\n\n")
-                            f.write(f"Conjunto busca local: {melhor_conjunto}\n\n")
-                            f.write(f"Tamanho do conjunto busca local: {tamanho_obj_melhor_solucao}\n\n\n")
-                            f.close()
                 else:
                     if annealing:
                         r = random.uniform(0, 1)
@@ -149,6 +138,8 @@ def vns(solucao_inicial, kmax, tmax, listaADJ):
 
         while k < kmax:
             solucao_shake = swap(solucao_atual.copy(), 0.25)
+
+            # escolher se o annealing vai ser utilizado ou não | Penultimo parametro
             solucao, conjunto, tam_solucao = localSearch(solucao_shake.copy(), 100, 10, 0.9, 5, 20, swap, False, listaADJ)
 
             if tam_solucao < tam_solucao_atual:
@@ -156,7 +147,7 @@ def vns(solucao_inicial, kmax, tmax, listaADJ):
                 conjunto_atual = conjunto
                 tam_solucao_atual = tam_solucao
                 
-                with open('output-MH2-instancia-' + str(contador_instancias) + '.txt', 'w') as f:
+                with open('output-MH2-instancia.txt', 'a') as f:
                     f.write(f"Solucao vns: {solucao_atual}\n\n")
                     f.write(f"Conjunto vns: {conjunto_atual}\n\n")
                     f.write(f"Tamanho do conjunto vns: {tam_solucao_atual}\n\n\n")
@@ -178,53 +169,52 @@ if __name__ == '__main__':
     instancia2 = 'instancias-MH/cemk.txt'
     instancia3 = 'instancias-MH/umM.txt'
     instancia4 = 'instancias-MH/vqM.mtx'
-
-    instancias = [instancia1, instancia2, instancia3, instancia4]
     
-    for i in instancias:
-        with open(i, 'r') as f:
-            firstLine = f.readline()
-            dados = firstLine.split()
-            vertices = int(dados[0])
-            listaVertices = list(range(0, vertices + 1))
-            arestas = int(dados[1])
+    with open(instancia1, 'r') as f:
+        firstLine = f.readline()
+        dados = firstLine.split()
+        vertices = int(dados[0])
+        listaVertices = list(range(0, vertices + 1))
+        arestas = int(dados[1])
 
-            listaADJ = defaultdict(set)
-            linhas = f.readlines()
-            for line in linhas:
-                line = line.split()
-                if int(line[0]) != int(line[1]):
-                    addADJ(listaADJ, int(line[0]), int(line[1]))
-                    addADJ(listaADJ, int(line[1]), int(line[0]))
-        
-        graus = []
-        for v in listaVertices:
-            graus.append(descobreGrau(v, listaADJ))
-        
-        # solucao = []
-        # solucao_one_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
+        listaADJ = defaultdict(set)
+        linhas = f.readlines()
+        for line in linhas:
+            line = line.split()
+            if int(line[0]) != int(line[1]):
+                addADJ(listaADJ, int(line[0]), int(line[1]))
+                addADJ(listaADJ, int(line[1]), int(line[0]))
+    
+    graus = []
+    for v in listaVertices:
+        graus.append(descobreGrau(v, listaADJ))
 
-        # solucao = []
-        # solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
+    # escolher qual heurística será utilizada
+    
+    # solucao = []
+    # solucao_one_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
 
-        solucao = []
-        solucao = listaVertices
-        solucao = random.sample(solucao, len(solucao))
+    # solucao = []
+    # solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
 
-        melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
+    solucao = []
+    solucao = listaVertices
+    solucao = random.sample(solucao, len(solucao))
 
-        # Variable Neighborhood Search
-        solucao, conjunto, tam_conjunto = vns(solucao, 5, 10, deepcopy(listaADJ))
+    melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
 
-        pr.disable()
-        s = io.StringIO()
-        sortby = SortKey.CUMULATIVE
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
+    print(f"Tamanho do conjunto inicial: {tamanho_melhor_conjunto}\n")
 
-        with open('output-MH2-instancia-' + str(contador_instancias) + '.txt', 'a') as f:
-            f.write(s.getvalue())
-            f.close()
-            
-        contador_instancias += 1
+    # Variable Neighborhood Search
+    solucao, conjunto, tam_conjunto = vns(solucao, 5, 10, deepcopy(listaADJ))
+
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
+
+    with open('output-MH2-instancia.txt', 'a') as f:
+        f.write(s.getvalue())
+        f.close()

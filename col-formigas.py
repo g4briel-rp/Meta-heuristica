@@ -9,22 +9,6 @@ contador_instancias = 1
 def adjacentes(u, listaADJ):
     return listaADJ[u]
 
-def swap(solucao, porcentagem = 0.0005):
-    qtd = round(porcentagem * len(solucao))
-    contador = 0
-    while contador < qtd:
-        index1 = random.randint(0, len(solucao) - 1)
-        index2 = random.randint(0, len(solucao) - 1)
-        if index1 != index2:
-            solucao[index1], solucao[index2] = solucao[index2], solucao[index1]
-            contador += 1
-    return solucao
-
-def shift(solucao, n):
-    solucao = deque(solucao)
-    solucao.rotate(n)
-    return list(solucao)
-
 def descobreGrau(u, listaADJ):
     return len(adjacentes(u, listaADJ))
 
@@ -47,44 +31,6 @@ def avalia_solucao(solucao, listaADJ):
                 conjunto.append(s)
 
     return conjunto, len(conjunto)
-
-def solucao_one_max(numVertices, solucao, graus):
-    analisados = 0
-    while analisados <= numVertices:
-        indice = graus.index(max(graus))
-        solucao.append(indice)
-        graus[indice] = -1
-        analisados += 1
-
-def solucao_n_max(numVertices, solucao, graus, listaADJ):
-    conjunto = []
-    lenGraus = range(0, len(graus))
-    analisados = 0
-    while analisados <= numVertices:
-        indice = graus.index(max(graus))
-        solucao.append(indice)
-        graus[indice] = -1
-        analisados += 1
-
-        if not listaADJ:
-            break
-        else:
-            adj = adjacentes(indice, listaADJ)
-            if adj:
-                adj = list(adj)
-                for v in adj:
-                    listaADJ[indice].remove(v)
-                    listaADJ[v].remove(indice)
-                conjunto.append(indice)
-        
-        for g in lenGraus:
-            if graus[g] != -1:
-                graus[g] = descobreGrau(g, listaADJ)
-                if graus[g] == 0:
-                    graus[g] = -1
-                    analisados += 1
-
-    # print(f"Resultado: {conjunto} | Número de vertices: {len(conjunto)}\n")
 
 def soma_feromonios(feromonios):
     soma = 0
@@ -167,22 +113,10 @@ if __name__ == '__main__':
                 if int(line[0]) != int(line[1]):
                     addADJ(listaADJ, int(line[0]), int(line[1]))
                     addADJ(listaADJ, int(line[1]), int(line[0]))
-        
+
         graus = []
         for v in listaVertices:
             graus.append(descobreGrau(v, listaADJ))
-        
-        # solucao = []
-        # solucao_one_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
-
-        # solucao = []
-        # solucao_n_max(vertices, solucao, graus.copy(), deepcopy(listaADJ))
-
-        solucao = []
-        solucao = listaVertices
-        solucao = random.sample(solucao, len(solucao))
-
-        melhor_conjunto, tamanho_melhor_conjunto = avalia_solucao(solucao, deepcopy(listaADJ))
 
         # Colonias de Formigas
         feromonios = defaultdict(set)
@@ -196,7 +130,6 @@ if __name__ == '__main__':
         sortby = SortKey.CUMULATIVE
         ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
-        print(s.getvalue())
 
         with open('output-MH3-instancia-' + str(contador_instancias) + '.txt', 'a') as f:
             f.write(s.getvalue())
